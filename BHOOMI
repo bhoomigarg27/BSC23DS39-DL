@@ -1,0 +1,71 @@
+import streamlit as st
+
+class StudentAttendanceLedger:
+    def __init__(self):
+        self.attendance_data = {}
+
+    def add_student(self, student_name):
+        if student_name not in self.attendance_data:
+            self.attendance_data[student_name] = []
+            return f"Student {student_name} added to the ledger."
+        else:
+            return f"Student {student_name} already exists in the ledger."
+
+    def mark_attendance(self, student_name, present):
+        if student_name in self.attendance_data:
+            self.attendance_data[student_name].append(present)
+            status = 'Present' if present else 'Absent'
+            return f"Attendance for {student_name}: {status}"
+        else:
+            return f"Student {student_name} not found in the ledger."
+
+    def display_attendance(self):
+        attendance_display = ""
+        for student, attendance in self.attendance_data.items():
+            attendance_status = ['Present' if status else 'Absent' for status in attendance]
+            attendance_display += f"{student}: {', '.join(attendance_status)}\n"
+        return attendance_display
+
+    def get_attendance_summary(self, student_name):
+        if student_name in self.attendance_data:
+            total_classes = len(self.attendance_data[student_name])
+            total_present = sum(self.attendance_data[student_name])
+            total_absent = total_classes - total_present
+            return f"{student_name} - Total Classes: {total_classes}, Present: {total_present}, Absent: {total_absent}"
+        else:
+            return f"Student {student_name} not found in the ledger."
+
+
+# Streamlit interface
+ledger = StudentAttendanceLedger()
+
+st.title("Student Attendance Ledger")
+
+# Add student section
+st.subheader("Add Student")
+student_name = st.text_input("Enter student name:")
+if st.button("Add Student"):
+    message = ledger.add_student(student_name)
+    st.success(message)
+
+# Mark attendance section
+st.subheader("Mark Attendance")
+attendance_student = st.text_input("Enter student name to mark attendance:")
+attendance_status = st.radio("Attendance status:", ('Present', 'Absent'))
+if st.button("Mark Attendance"):
+    present = True if attendance_status == 'Present' else False
+    message = ledger.mark_attendance(attendance_student, present)
+    st.success(message)
+
+# Display attendance section
+st.subheader("Display Attendance Ledger")
+if st.button("Show Attendance"):
+    attendance_display = ledger.display_attendance()
+    st.text(attendance_display)
+
+# Attendance summary for individual student
+st.subheader("Student Attendance Summary")
+summary_student = st.text_input("Enter student name to get attendance summary:")
+if st.button("Get Summary"):
+    summary_message = ledger.get_attendance_summary(summary_student)
+    st.text(summary_message)
